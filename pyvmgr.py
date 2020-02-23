@@ -84,24 +84,24 @@ class Group:
         
         vmNode = self.belongsToGroup(vmName)
         if (vmNode is None):
-            print("Adding VM: %s" % vmName)
+            print("Adding VM: {0}".format(vmName))
             self.vmsList.append(VirtualMachine(vmsContainer, vmName))
         else:
-            print("%s is already part of the group" % vmName)
+            print("{0} is already part of the group".format(vmName))
 
 
     def removeNode(self, vmName):
 
         vmNode = self.belongsToGroup(vmName)
         if ( vmNode is None):
-            print("%s is not part of the group" % vmName)
+            print("{0} is not part of the group".format(vmName))
         else:
             self.vmsList.remove(vmNode)
 
     def printCurrent(self):
 
         for vm in self.vmsList:
-            print("%s - Current Snapshot: %s" % (vm, vm.getCurrentSnapshot()))
+            print("{0} - Current Snapshot: {1}".format(vm, vm.getCurrentSnapshot()))
 
 
     def isGroupDown(self, timeOut):
@@ -115,7 +115,7 @@ class Group:
             for node in self.vmsList:
                 if not node.isVmDown():
                     groupDown = False
-                    print("%s is UP" % node)
+                    print("{0} is UP".format(node))
                 elif node.isVmDown():
                     groupDown = groupDown and True
                 if not groupDown:
@@ -127,15 +127,15 @@ class Group:
 
         for node in self.vmsList:
             if not node.isVmDown():
-                print("%s is UP" % node)
+                print("{0} is UP".format(node))
             elif node.isVmDown():
-                print("%s is DOWN" % node)
+                print("{0} is DOWN".format(node))
 
 
     def printVmsList(self):
 
         for node in self.vmsList:
-            print("%s" % node.getVmName())
+            print("{0}".format(node.getVmName()))
 
 
     def getVmsList(self):
@@ -147,14 +147,15 @@ class Group:
 
         with open(filename,'w') as outputfile:
                 for node in self.vmsList:
-                    outputfile.write("%s\n" % node.getVmName())
+                    outputfile.write("{0}\n".format(node.getVmName()))
 
 
     def printSnapshotsTree(self):
 
+        # Draw box
         for node in self.vmsList:
             print(chr(9556) + chr(9552) * ( 2 + len(node.getVmName())) + chr(9559))
-            print("%s %s %s" % (chr(9553), node.getVmName(), chr(9553)))
+            print("{0} {1} {2}".format(chr(9553), node.getVmName(), chr(9553)))
             print(chr(9562) + chr(9552) * ( 2 + len(node.getVmName())) + chr(9565))
             node.printSnapshotsList()
 
@@ -163,20 +164,20 @@ class Group:
 
         for node in self.vmsList:
             if not node.isVmDown():
-                print("Shutting down VM: %s" % node.getVmName())
+                print("Shutting down VM: {0}".format(node.getVmName()))
                 node.shutdownGuestOs()
             else:
-                print("VM: %s already Powered Off" % node.getVmName())
+                print("VM: {0} already Powered Off".format(node.getVmName()))
 
 
     def powerOnGroup(self):
 
         for node in self.vmsList:
             if node.isVmDown():
-                print("Powering UP VM %s" % node.getVmName())
+                print("Powering UP VM {0}".format(node.getVmName()))
                 node.powerOn()
             else:
-                print("VM %s is already UP" % node.getVmName())
+                print("VM {0} is already UP".format(node.getVmName())
 
 
     def takeSnapshot(self, snapshotName, snapshotDescription):
@@ -221,7 +222,7 @@ class VirtualMachine:
                 break
 
         if not vm:
-            raise Exception("Virtual Machine %s doesn't exists" % vmName)
+            raise Exception("Virtual Machine {0} doesn't exists".format(vmName))
 
         self.vm = vm
 
@@ -273,11 +274,11 @@ class VirtualMachine:
             if snapshot.getSnapshotLevel() > 0:
                 level = " " * snapshot.getSnapshotLevel() * 5 + "  " +  level
 
-            print("%s [%s] %s " % (level, snapshot.getSnapshotId(), snapshot))
+            print("{0} [{1}] %s ".format(level, snapshot.getSnapshotId(), snapshot))
 
             if snapshot.isCurrent:
                 level = " " * 5 + level
-                print("%s %s" % (level, "You are Here"))
+                print("{0} {1}".format(level, "You are Here"))
 
 
     def getHost(self):
@@ -322,13 +323,13 @@ class VirtualMachine:
         dumpMemory = False
         quiesce = False
         snapshotDescription += (' on ' + timeStamp)
-        print("Taking snapshot: %s for %s" % (snapshotName, self.getVmName()))
+        print("Taking snapshot: {0} for {1}".format(snapshotName, self.getVmName()))
         WaitForTask(self.vm.CreateSnapshot(snapshotName, snapshotDescription, dumpMemory, quiesce))
 
 
     def revertToCurrentSnapshot(self):
 
-        print("Reverting vm: %s to current snapshot" % self.vm.name)
+        print("Reverting vm: {0} to current snapshot".format(self.vm.name))
         WaitForTask(self.vm.snapshot.currentSnapshot.RevertToSnapshot_Task())
 
 
@@ -338,14 +339,14 @@ class VirtualMachine:
         found = False
         for node in self.snapshotsList:
             if snapshotname == node.getSnapshotName():
-                print("Reverting vm: %s to snapshot [%s] %s" % (self.vm.name, node.getSnapshotId(), snapshotname))
+                print("Reverting vm: {0} to snapshot [{1}] {2}".format(self.vm.name, node.getSnapshotId(), snapshotname))
                 WaitForTask(node.getSnapshotObj().RevertToSnapshot_Task())
                 found = True
                 break
         if not found:
-            print("Snapshot %s not found in VM: %s" % (snapshotname, self.vm.name))
+            print("Snapshot {0} not found in VM: {1}".format(snapshotname, self.vm.name))
             if not self.isVmDown():
-                print("Shutting down VM: %s" % self.vm.name)
+                print("Shutting down VM: {0}".format(self.vm.name))
                 self.shutdownGuestOs()
 
 
@@ -354,7 +355,7 @@ class VirtualMachine:
         self.reloadSnapshotsList()
         for node in self.snapshotsList:
             if snapshotname == node.getSnapshotName():
-                print("Deleting snapshot [%s] %s of VM %s" % (node.getSnapshotId(), snapshotname, self.vm.name))
+                print("Deleting snapshot [{0}] {1} of VM {2}".format(node.getSnapshotId(), snapshotname, self.vm.name))
                 WaitForTask(node.getSnapshotObj().RemoveSnapshot_Task(consolidate))
                 break    
 
@@ -449,7 +450,7 @@ class CmdLine(Cmd):
             return -1
         if len(args) == 0:
             for vm in self.vSphereConnection.getContainer().view:
-                print(vm.name)        
+                print(vm.name)
         else:
             parsedArgs = args.split(' ')
             if len(parsedArgs) > 0 and len(parsedArgs) <= 2:
@@ -462,8 +463,23 @@ class CmdLine(Cmd):
                         if parsedArgs[1] in vm.name:
                             print(vm.name)
             else:
-                print("Too many arguments")        
-                
+                print("Too many arguments")
+
+    def do_printvmsby(self, args):
+        """Prints all the VMs in the specified container view (ESXi host or Resource Group)
+            Usage: do_printvmsby [container]
+            Example: do_printvmsby esxi01.priv --> prints all VMs within the container"""
+
+        if not self.vSphereConnection:
+            print("Please connect to vSphere")
+            return -1
+        if len(args) > 0:
+            parsedArgs = args.split(' ')
+            for vm in self.vSphereConnection.getContainer().view: # Check how to filter
+                print(vm.name)
+        else:
+            print("Missing container")
+
 
     def do_printgroup(self, args):
         'Prints VMs defined by the applied group'
@@ -475,12 +491,12 @@ class CmdLine(Cmd):
         'Applies group based on a list of VMs in a file or a comma separated list:   loadgroup </path/to/file> or loadgroup testVM1,testVM2,testVM3'
 
         self.group = Group(loadList(nodes), self.vSphereConnection.getContainer())
-    
+
 
     def do_addvm(self, node):
         """Adds a VM to the current group
             Usage:  addtogroup testVM1"""
-        
+
         if not node:
             print("Missing VM Name")
         else:
@@ -542,9 +558,7 @@ class CmdLine(Cmd):
 
 
     def do_removesnapshot(self, args):
-        """Removes snapshot. A modifier can be used to restart the VMs after reverting. 
-
-        Usage : gotosnapshot <snapshotname> restart"""
+        'Removes snapshot'
 
         if len(args) == 0:
             print("Missing Snapshot name")
@@ -577,7 +591,7 @@ class CmdLine(Cmd):
         'Shuts down the VMs in the group'
 
         self.group.shutdownGroupGuestOS()
-                
+
 
     def do_takesnapshot(self, args):
         """ Take snapshot.  Description is optional (A time stamp will be added).
@@ -611,21 +625,21 @@ def getLogInInfo(args):
     if args == '':
         vCenterServer = input("Enter vCenter Server name or IP address:")
         vCenterUserName = input("Enter vCenter Username:")
-        vCenterPassword = getpass.getpass(prompt='Enter the password for user %s at vCenter server %s: ' % (vCenterUserName,vCenterServer))
+        vCenterPassword = getpass.getpass(prompt='Enter the password for user {0} at vCenter server {1}: '.format(vCenterUserName,vCenterServer))
 
     elif len(args.split(" ")) == 1:
         connectionArgs = args.split('@')
         if len(connectionArgs) == 1:
             vCenterServer = connectionArgs[0]
             vCenterUserName = input("Enter vCenter Username:")
-            vCenterPassword = getpass.getpass(prompt='Enter the password for user %s at vCenter server %s: ' % (vCenterUserName,vCenterServer))
+            vCenterPassword = getpass.getpass(prompt='Enter the password for user {0} at vCenter server {1}: '.format(vCenterUserName,vCenterServer))
             
         elif len(connectionArgs) == 2:
             vCenterServer = connectionArgs[1]
             vCenterCredentials = connectionArgs[0].split(':')
             vCenterUserName = vCenterCredentials[0]
             if len(vCenterCredentials) == 1:    
-                vCenterPassword = getpass.getpass(prompt='Enter the password for user %s at vCenter server %s: ' % (vCenterUserName,vCenterServer))
+                vCenterPassword = getpass.getpass(prompt='Enter the password for user {0} at vCenter server {1}: '.format(vCenterUserName,vCenterServer))
             elif len(vCenterCredentials) == 2:
                 vCenterPassword = vCenterCredentials[1]
 
